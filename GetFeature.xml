@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature>
+    <name>New Feature</name>
+    <description>This is a new feature for DMD</description>
+    <status>ACTIVE</status>
+    <createdDate>2026-03-17</createdDate>
+    <version>1.0</version>
+</feature>
