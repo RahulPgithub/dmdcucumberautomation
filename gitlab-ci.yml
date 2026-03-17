@@ -1,0 +1,100 @@
+stages:
+  - test
+  - report
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  MAVEN_CLI_OPTS: "-s $CI_PROJECT_DIR/.m2/settings.xml -B"
+
+cache:
+  paths:
+    - .m2/repository/
+    - target/
+
+test:dev:
+  stage: test
+  image: maven:3.8.1-jdk-11
+  script:
+    - mvn clean test -Denv=dev -Dmaven.test.failure.ignore=true
+  artifacts:
+    when: always
+    paths:
+      - target/reports/
+      - logs/
+      - reports/
+    reports:
+      junit: target/reports/cucumber-report.xml
+  tags:
+    - docker
+  only:
+    - develop
+
+test:qa:
+  stage: test
+  image: maven:3.8.1-jdk-11
+  script:
+    - mvn clean test -Denv=qa -Dmaven.test.failure.ignore=true
+  artifacts:
+    when: always
+    paths:
+      - target/reports/
+      - logs/
+      - reports/
+    reports:
+      junit: target/reports/cucumber-report.xml
+  tags:
+    - docker
+  only:
+    - main
+
+test:staging:
+  stage: test
+  image: maven:3.8.1-jdk-11
+  script:
+    - mvn clean test -Denv=staging -Dmaven.test.failure.ignore=true
+  artifacts:
+    when: always
+    paths:
+      - target/reports/
+      - logs/
+      - reports/
+    reports:
+      junit: target/reports/cucumber-report.xml
+  tags:
+    - docker
+  only:
+    - /^release\/.*$/
+
+test:prod:
+  stage: test
+  image: maven:3.8.1-jdk-11
+  script:
+    - mvn clean test -Denv=prod -Dmaven.test.failure.ignore=true
+  artifacts:
+    when: always
+    paths:
+      - target/reports/
+      - logs/
+      - reports/
+    reports:
+      junit: target/reports/cucumber-report.xml
+  tags:
+    - docker
+  only:
+    - tags
+
+generate_report:
+  stage: report
+  image: maven:3.8.1-jdk-11
+  script:
+    - echo "Reports generated at target/cucumber-reports/index.html"
+  artifacts:
+    paths:
+      - target/cucumber-reports/
+  tags:
+    - docker
+  dependencies:
+    - test:dev
+    - test:qa
+    - test:staging
+    - test:prod
